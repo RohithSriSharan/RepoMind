@@ -40,6 +40,13 @@ if uploaded_file is not None:
 
 st.divider()
 
+with st.expander("🔧 Admin: remove a source"):
+    source_to_delete = st.text_input("Exact source filename to delete")
+    if st.button("Delete this source") and source_to_delete:
+        from src.vectorstore import delete_by_source
+        delete_by_source(source_to_delete)
+        st.success(f"Deleted chunks for '{source_to_delete}'")
+
 # --- Ask section ---
 st.subheader("2. Ask a question")
 question = st.text_input("Your question")

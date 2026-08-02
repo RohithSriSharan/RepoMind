@@ -61,7 +61,13 @@ def query_chunks(query_vector: list[float], n_results: int = 3) -> dict:
     logger.info(f"Query returned {len(results['documents'][0])} result(s).")
     return results
 
+def delete_by_source(source_filename: str) -> None:
+    """Remove all chunks belonging to a specific source file from the collection."""
+    collection = get_collection()
+    collection.delete(where={"source": source_filename})
+    logger.info(f"Deleted all chunks with source='{source_filename}'. Collection now has {collection.count()} items.")
 
+    
 if __name__ == "__main__":
     from src.ingestion import load_document
     from src.chunking import chunk_documents
