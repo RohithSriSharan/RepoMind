@@ -2,7 +2,7 @@
 
 A Retrieval-Augmented Generation (RAG) system that lets you upload a document (PDF, Markdown, or text) and ask natural-language questions about it — with answers grounded strictly in the document's content, and page-level citations.
 
-**🔗 Live demo:** [repomind.streamlit.app](https://repomind-jriltvmpewosxsvlg5rput.streamlit.app/)
+**🔗 Live demo:** [repomind.streamlit.app](https://repomind-ceecagubbgpx22w6x7c9xx.streamlit.app/)
 **📦 Repo:** [github.com/RohithSriSharan/RepoMind](https://github.com/RohithSriSharan/RepoMind)
 
 ---
