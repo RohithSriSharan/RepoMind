@@ -12,16 +12,15 @@ logger = get_logger(__name__)
 
 st.set_page_config(page_title="Cortex — Document Q&A", page_icon="🧠", layout="centered")
 
-# ================= Sidebar: About =================
-with st.sidebar:
-    st.markdown("## 🧠 About Cortex")
+# ================= About (visible top expander, not hidden in sidebar) =================
+with st.expander("ℹ️ About Cortex", expanded=False):
     st.markdown(
         "Cortex is a **Retrieval-Augmented Generation (RAG)** system — "
         "upload a document, and it answers your questions using only "
         "that document's content, with page-level citations."
     )
 
-    st.markdown("### How it works")
+    st.markdown("**How it works**")
     st.markdown(
         "- **Ingest** — parse & clean the document\n"
         "- **Chunk** — split into overlapping passages\n"
@@ -32,7 +31,7 @@ with st.sidebar:
         "strictly in the retrieved context"
     )
 
-    st.markdown("### Tech stack")
+    st.markdown("**Tech stack**")
     st.markdown(
         "`Python` · `Streamlit` · `sentence-transformers` · `ChromaDB` · "
         "`Groq (Llama 3.3)` · `pytest`"
@@ -77,15 +76,7 @@ st.markdown("""
         font-weight: 400;
     }
 
-    /* Section cards */
-    .cortex-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 1.4rem 1.5rem;
-        margin-bottom: 1.2rem;
-    }
-    .section-label {
+    /* Section labels */
         font-weight: 700;
         font-size: 1.05rem;
         margin-bottom: 0.6rem;
@@ -158,71 +149,67 @@ st.markdown("""
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ================= Upload Section =================
-st.markdown('<div class="cortex-card">', unsafe_allow_html=True)
-st.markdown('<div class="section-label">📄 Upload a document</div>', unsafe_allow_html=True)
+with st.container(border=True):
+    st.markdown('<div class="section-label">📄 Upload a document</div>', unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader(
-    "Drop a PDF, Markdown, or text file",
-    type=["pdf", "md", "txt"],
-    label_visibility="collapsed"
-)
+    uploaded_file = st.file_uploader(
+        "Drop a PDF, Markdown, or text file",
+        type=["pdf", "md", "txt"],
+        label_visibility="collapsed"
+    )
 
-if uploaded_file is not None:
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.caption(f"Selected: **{uploaded_file.name}**")
-    with col2:
-        ingest_clicked = st.button("Ingest ⚡", use_container_width=True)
+    if uploaded_file is not None:
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.caption(f"Selected: **{uploaded_file.name}**")
+        with col2:
+            ingest_clicked = st.button("Ingest ⚡", use_container_width=True)
 
-    if ingest_clicked:
-        with st.spinner("Reading, chunking, and embedding your document..."):
-            suffix = os.path.splitext(uploaded_file.name)[1]
-            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-                tmp.write(uploaded_file.getvalue())
-                tmp_path = tmp.name
+        if ingest_clicked:
+            with st.spinner("Reading, chunking, and embedding your document..."):
+                suffix = os.path.splitext(uploaded_file.name)[1]
+                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                    tmp.write(uploaded_file.getvalue())
+                    tmp_path = tmp.name
 
-            try:
-                count = ingest_file(tmp_path)
-                st.success(f"✅ Added **{count} chunks** from '{uploaded_file.name}' to the index.")
-            except Exception as e:
-                logger.error(f"Ingestion failed for {uploaded_file.name}: {e}")
-                st.error(f"Something went wrong: {e}")
-            finally:
-                os.unlink(tmp_path)
-
-st.markdown('</div>', unsafe_allow_html=True)
+                try:
+                    count = ingest_file(tmp_path)
+                    st.success(f"✅ Added **{count} chunks** from '{uploaded_file.name}' to the index.")
+                except Exception as e:
+                    logger.error(f"Ingestion failed for {uploaded_file.name}: {e}")
+                    st.error(f"Something went wrong: {e}")
+                finally:
+                    os.unlink(tmp_path)
 
 # ================= Ask Section =================
-st.markdown('<div class="cortex-card">', unsafe_allow_html=True)
-st.markdown('<div class="section-label">💬 Ask a question</div>', unsafe_allow_html=True)
+with st.container(border=True):
+    st.markdown('<div class="section-label">💬 Ask a question</div>', unsafe_allow_html=True)
 
-question = st.text_input(
-    "Your question",
-    placeholder="e.g. What does this document say about...",
-    label_visibility="collapsed"
-)
-ask_clicked = st.button("Ask Cortex 🔍", use_container_width=True)
+    question = st.text_input(
+        "Your question",
+        placeholder="e.g. What does this document say about...",
+        label_visibility="collapsed"
+    )
+    ask_clicked = st.button("Ask Cortex 🔍", use_container_width=True)
 
-if ask_clicked and question:
-    with st.spinner("Retrieving relevant passages and generating an answer..."):
-        try:
-            result = ask(question)
+    if ask_clicked and question:
+        with st.spinner("Retrieving relevant passages and generating an answer..."):
+            try:
+                result = ask(question)
 
-            st.markdown('<div class="section-label" style="margin-top:1rem;">✨ Answer</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="answer-box">{result["answer"]}</div>', unsafe_allow_html=True)
+                st.markdown('<div class="section-label" style="margin-top:1rem;">✨ Answer</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="answer-box">{result["answer"]}</div>', unsafe_allow_html=True)
 
-            st.markdown("<br>", unsafe_allow_html=True)
-            with st.expander("📚 Sources used"):
-                for src in result["sources"]:
-                    st.markdown(
-                        f'<span class="source-chip">{src["source"]} · page {src["page_number"]}</span>',
-                        unsafe_allow_html=True
-                    )
-        except Exception as e:
-            logger.error(f"Query failed: {e}")
-            st.error(f"Something went wrong: {e}")
-
-st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown("<br>", unsafe_allow_html=True)
+                with st.expander("📚 Sources used"):
+                    for src in result["sources"]:
+                        st.markdown(
+                            f'<span class="source-chip">{src["source"]} · page {src["page_number"]}</span>',
+                            unsafe_allow_html=True
+                        )
+            except Exception as e:
+                logger.error(f"Query failed: {e}")
+                st.error(f"Something went wrong: {e}")
 
 # ================= Admin (cleanup only, not user-facing) =================
 with st.expander("🔧 Admin"):
