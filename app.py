@@ -12,15 +12,16 @@ logger = get_logger(__name__)
 
 st.set_page_config(page_title="Cortex — Document Q&A", page_icon="🧠", layout="centered")
 
-# ================= About (visible top expander, not hidden in sidebar) =================
-with st.expander("ℹ️ About Cortex", expanded=False):
+# ================= Sidebar: About =================
+with st.sidebar:
+    st.markdown("## 🧠 About Cortex")
     st.markdown(
         "Cortex is a **Retrieval-Augmented Generation (RAG)** system — "
         "upload a document, and it answers your questions using only "
         "that document's content, with page-level citations."
     )
 
-    st.markdown("**How it works**")
+    st.markdown("### How it works")
     st.markdown(
         "- **Ingest** — parse & clean the document\n"
         "- **Chunk** — split into overlapping passages\n"
@@ -31,7 +32,7 @@ with st.expander("ℹ️ About Cortex", expanded=False):
         "strictly in the retrieved context"
     )
 
-    st.markdown("**Tech stack**")
+    st.markdown("### Tech stack")
     st.markdown(
         "`Python` · `Streamlit` · `sentence-transformers` · `ChromaDB` · "
         "`Groq (Llama 3.3)` · `pytest`"
@@ -74,6 +75,20 @@ st.markdown("""
         color: #9ca3af;
         font-size: 1.05rem;
         font-weight: 400;
+    }
+
+    /* Sidebar collapse arrow - label it "About" */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.3rem;
+    }
+    [data-testid="stSidebarCollapsedControl"]::before {
+        content: "About";
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #a855f7;
+        white-space: nowrap;
     }
 
     /* Section labels */
